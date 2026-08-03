@@ -38,11 +38,18 @@ def send_welcome(message):
 
     bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} {message.from_user.last_name}!')
     if not habits:
-        bot.send_message(message.chat.id, 'У вас пока нет привычек./n Добавим новую?',reply_markup=make)
+        bot.send_message(message.chat.id, 'У тебя пока нет привычек.\nДобавим новую?',reply_markup=make)
         #bot.send_message(message.chat.id,'Добавим новую?',reply_markup=make)
         #markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
     else:
         bot.send_message(message.chat.id,'Ваше меню:', reply_markup=markup)
 #def add_habit(message):
-    
+ @bot.callback_query_handler(func=lambda call: True)
+ def button(call):
+    if call.data=='add':
+        bot.send_message(call.messege.chat.id,"Напиши название привычки:")
+    elif call.data=='delete':
+        bot.send_message(call.messege.chat.id,"Удаление")
+    elif call.data=='mark':
+        bot.send_message(call.messege.chat.id,"Отмечание")
 bot.polling(none_stop=True)
