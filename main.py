@@ -1,9 +1,9 @@
-from fileinput import close
-
 import telebot
 from telebot import types
 import sqlite3
 from datetime import datetime, timedelta
+#import schedule
+#import time
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
 user_action={}
@@ -67,7 +67,7 @@ def streak(habit_id):
     today=datetime.now().date()
 
     for i,date in enumerate(dates):
-        day=datetime.strftime(date[0],'%Y-%m-%d').date()
+        day=datetime.strptime(date[0],'%Y-%m-%d').date()
 
         expected_day=today - timedelta(days=i)
 
@@ -93,7 +93,10 @@ def button(call):
         conn.close()
 
         if not habits:
-            bot.send_message(message.chat.id, 'У тебя нет привычек для удаления.', reply_markup=make)
+            make = types.InlineKeyboardMarkup()
+            make.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
+
+            bot.send_message(call.message.chat.id, 'У тебя нет привычек для удаления.', reply_markup=make)
         else:
             for habit in habits:
                 markup = types.InlineKeyboardMarkup()
@@ -114,7 +117,10 @@ def button(call):
         conn.close()
 
         if not habits:
-            bot.send_message(message.chat.id, 'У тебя пока нет привычек.\nДобавим новую?', reply_markup=make)
+            make = types.InlineKeyboardMarkup()
+            make.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
+
+            bot.send_message(call.message.chat.id, 'У тебя пока нет привычек.\nДобавим новую?', reply_markup=make)
         else:
             for habit in habits:
 
@@ -131,13 +137,13 @@ def button(call):
         today = datetime.now().strftime('%Y-%m-%d')
 
         cur.execute("DELETE FROM progress WHERE habit_id=?",(habit_id,))
-        cur.execute("DELETE FROM progress WHERE id=?", (habit_id,))
+        cur.execute("DELETE FROM habits WHERE id=?", (habit_id,))
 
         conn.commit()
 
         conn.close()
 
-        bot.answer_callback_query(call.id, "Молодец! Привычка выполнена")
+        bot.answer_callback_query(call.id, "Привычка удалена")
 
         bot.delete_message(call.message.chat.id,call.message.message_id)
 
