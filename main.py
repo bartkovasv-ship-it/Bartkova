@@ -183,16 +183,26 @@ def button(call):
         conn.close()
 
         if not result:
-            bot.send_message(call.message.chat.id,"У тебя пока нет выполненых привычек.")
+            stat = types.InlineKeyboardMarkup()
+            stat.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
+            bot.send_message(call.message.chat.id,"У тебя пока нет выполненых привычек.\nДавай сделаем их",reply_markup=stat)
         else:
             text="Твоя статистика:\n\n"
+
+            markup = types.InlineKeyboardMarkup()
+
+            markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
+            markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
+            # markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
+            markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
+            markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
             for habit in result:
                 #text+=f"{habit[0]} - {habit[1]} раз\n"
                 my_streak=streak(habit[0])
-                text+=(f"{habit[0]}\n"f"Выполнено: {habit[1]} раз\n"f"Серия: {my_streak} дней\n\n")
+                text+=(f"{habit[0]}\n"f"Выполнено: {habit[1]} раз\n"f"🔥 Серия: {my_streak} дней\n\n")
             text+="Ты молодец!!!"
-            bot.send_message(call.message.chat.id,text)
+            bot.send_message(call.message.chat.id,text,reply_markup=markup)
 
 
 @bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="add_habit")
