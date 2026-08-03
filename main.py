@@ -49,7 +49,33 @@ def send_welcome(message):
         bot.send_message(message.chat.id,'Ваше меню:', reply_markup=markup)
 #def add_habit(message):ъ
 
+def streak(habit_id):
 
+    conn = sqlite3.connect('data.sql')
+    cur = conn.cursor()
+
+    cur.execute("SELECT date FROM progress WHERE habit_id=?",(habit_id,))
+
+    dates=cur.fetchall()
+
+    conn.close()
+
+    if not dates:
+        return 0
+    count=0
+
+    today=datetime.now().date()
+
+    for i,date in enumerate(dates):
+        day=datetime.strftime(date[0],'%Y-%m-%d').date()
+
+        expected_day=today - timedelta(days=i)
+
+        if day==expected_day:
+            count+=1
+        else:break
+
+    return count
 @bot.callback_query_handler(func=lambda call: True)
 def button(call):
     if call.data=='add':
