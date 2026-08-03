@@ -3,7 +3,7 @@ from fileinput import close
 import telebot
 from telebot import types
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
 user_action={}
@@ -56,7 +56,24 @@ def button(call):
         user_action[call.message.chat.id]="add_habit"
         bot.send_message(call.message.chat.id,"Напиши название привычки:")
     elif call.data=='delete':
-        bot.send_message(call.message.chat.id,"Удаление")
+
+        conn = sqlite3.connect('data.sql')
+        cur = conn.cursor()
+
+        cur.execute("SELECT id, name FROM habits WHERE user_id=?", (call.from_user.id,))
+
+        habits = cur.fetchall()
+
+        conn.close()
+
+        if not habits:
+            bot.send_message(message.chat.id, 'У тебя нет привычек для удаления.', reply_markup=make)
+        else:
+            for habit in habits:
+                markup = types.InlineKeyboardMarkup()
+                markup.add(types.InlineKeyboardButton("Удалить", callback_data=f"delete_{habit[0]}"))
+
+                bot.send_message(call.message.chat.id, f"{habit[1]}", reply_markup=markup)
     #elif call.data=='mark':
     #   bot.send_message(call.message.chat.id,"Отмечание")
     elif call.data=='list':
@@ -79,6 +96,25 @@ def button(call):
                 markup.add(types.InlineKeyboardButton("Выполнено", callback_data=f"done_{habit[0]}"))
 
                 bot.send_message(call.message.chat.id,f"{habit[1]}",reply_markup=markup)
+    elif call.data.startswith('delete_'):
+        habit_id = call.data.split('_')[1]
+
+        conn = sqlite3.connect('data.sql')
+        cur = conn.cursor()
+
+        today = datetime.now().strftime('%Y-%m-%d')
+
+        cur.execute("DELETE FROM progress WHERE habit_id=?",(habit_id,))
+        cur.execute("DELETE FROM progress WHERE id=?", (habit_id,))
+
+        conn.commit()
+
+        conn.close()
+
+        bot.answer_callback_query(call.id, "Молодец! Привычка выполнена")
+
+        bot.delete_message(call.message.chat.id,call.message.message_id)
+
     elif call.data.startswith('done_'):
         habit_id = call.data.split('_')[1]
 
@@ -105,7 +141,7 @@ def button(call):
 
         result=cur.fetchall()
 
-        print(result)
+        #print(result)
 
         conn.close()
 
@@ -116,7 +152,7 @@ def button(call):
 
             for habit in result:
                 text+=f"{habit[0]} - {habit[1]} раз\n"
-
+            text+="\nТы молодец!!!"
             bot.send_message(call.message.chat.id,text)
 
 
