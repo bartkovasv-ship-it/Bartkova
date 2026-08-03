@@ -2,7 +2,6 @@ import telebot
 from telebot import types
 import sqlite3
 from datetime import datetime, timedelta
-import schedule
 import time
 import threading
 
