@@ -3,7 +3,7 @@ from fileinput import close
 import telebot
 from telebot import types
 import sqlite3
-from datatime import datetime
+from datetime import datetime
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
 user_action={}
@@ -55,8 +55,8 @@ def button(call):
         bot.send_message(call.message.chat.id,"Напиши название привычки:")
     elif call.data=='delete':
         bot.send_message(call.message.chat.id,"Удаление")
-    elif call.data=='mark':
-        bot.send_message(call.message.chat.id,"Отмечание")
+    #elif call.data=='mark':
+    #   bot.send_message(call.message.chat.id,"Отмечание")
     elif call.data=='list':
 
         conn = sqlite3.connect('data.sql')
@@ -77,6 +77,25 @@ def button(call):
                 markup.add(types.InlineKeyboardButton("Выполнено", callback_data=f"done_{habit[0]}"))
 
                 bot.send_message(call.message.chat.id,f"{habit[1]}",reply_markup=markup)
+    elif call.data.startswith('done_'):
+        habit_id = call.data.split('_')[1]
+
+        conn = sqlite3.connect('data.sql')
+        cur = conn.cursor()
+
+        today = datetime.now().strftime('%Y-%m-%d')
+
+        cur.execute("INSERT INTO progress(habit_id, date) VALUES(?,?)",(habit_id, today))
+
+        conn.commit()
+
+        conn.close()
+
+        bot.answer_callback_query(call.id, "Молодец! Привычка выполнена")
+
+        bot.edit_message_reply_markup(call.message.chat.id,call.message.message_id,reply_markup=None)
+
+
 @bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="add_habit")
 def save_habits(message):
     conn=sqlite3.connect('data.sql')
