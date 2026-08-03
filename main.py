@@ -15,10 +15,8 @@ def send_welcome(message):
     conn=sqlite3.connect('data.sql')
     cur=conn.cursor()
 
-    cur.execute('CREATE TABLE IF NOT EXISTS habits (id int auto_increment primary key, user_id INTEGER, name TEXT)')
-    cur.execute('CREATE TABLE IF NOT EXISTS progress(id int auto_increment primary key, habit_id INTEGER, date TEXT)')
-    #cur.execute('CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT)')
-    #cur.execute('CREATE TABLE IF NOT EXISTS progress(id INTEGER PRIMARY KEY AUTOINCREMENT, habit_id INTEGER, date TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS progress(id INTEGER PRIMARY KEY AUTOINCREMENT, habit_id INTEGER, date TEXT)')
 
     conn.commit()
 
@@ -130,6 +128,13 @@ def button(call):
                 bot.send_message(call.message.chat.id,f"{habit[1]}",reply_markup=markup)
     elif call.data.startswith('delete_'):
         habit_id = call.data.split('_')[1]
+        #habit_id = int(habit_id)
+        #print("call.data =", call.data)
+
+        #parts = call.data.split("_")
+        #print(parts)
+        #print("Удаляем habit_id =", habit_id)
+
 
         conn = sqlite3.connect('data.sql')
         cur = conn.cursor()
