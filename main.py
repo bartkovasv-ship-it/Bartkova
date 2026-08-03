@@ -41,8 +41,6 @@ def send_welcome(message):
     bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} {message.from_user.last_name}!👋')
     if not habits:
         bot.send_message(message.chat.id, 'У тебя пока нет привычек.\nДобавим новую?',reply_markup=make)
-        #bot.send_message(message.chat.id,'Добавим новую?',reply_markup=make)
-        #markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
     else:
         bot.send_message(message.chat.id,'Ваше меню:', reply_markup=markup)
 
@@ -100,8 +98,6 @@ def button(call):
                 markup.add(types.InlineKeyboardButton("Удалить", callback_data=f"delete_{habit[0]}"))
 
                 bot.send_message(call.message.chat.id, f"{habit[1]}", reply_markup=markup)
-    #elif call.data=='mark':
-    #   bot.send_message(call.message.chat.id,"Отмечание")
     elif call.data=='list':
 
         conn = sqlite3.connect('data.sql')
@@ -127,13 +123,6 @@ def button(call):
                 bot.send_message(call.message.chat.id,f"{habit[1]}",reply_markup=markup)
     elif call.data.startswith('delete_'):
         habit_id = call.data.split('_')[1]
-        #habit_id = int(habit_id)
-        #print("call.data =", call.data)
-
-        #parts = call.data.split("_")
-        #print(parts)
-        #print("Удаляем habit_id =", habit_id)
-
 
         conn = sqlite3.connect('data.sql')
         cur = conn.cursor()
@@ -176,8 +165,6 @@ def button(call):
         cur.execute("SELECT habits.name, COUNT(progress.id) FROM habits LEFT JOIN progress ON habits.id = progress.habit_id WHERE habits.user_id=? GROUP BY habits.id, habits.name",(call.from_user.id,))
 
         result=cur.fetchall()
-
-        #print(result)
 
         conn.close()
 
