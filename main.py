@@ -188,8 +188,10 @@ def button(call):
             text="Твоя статистика:\n\n"
 
             for habit in result:
-                text+=f"{habit[0]} - {habit[1]} раз\n"
-            text+="\nТы молодец!!!"
+                #text+=f"{habit[0]} - {habit[1]} раз\n"
+                my_streak=streak(habit[0])
+                text+=(f"{habit[0]}\n"f"Выполнено: {habit[1]} раз\n"f"Серия: {my_streak} дней\n\n")
+            text+="Ты молодец!!!"
             bot.send_message(call.message.chat.id,text)
 
 
