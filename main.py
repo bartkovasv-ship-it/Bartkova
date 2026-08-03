@@ -32,21 +32,19 @@ def send_welcome(message):
 
     markup.add(types.InlineKeyboardButton('Создать новую привычку',callback_data='add'))
     markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
-    #markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
     markup.add(types.InlineKeyboardButton('Мои привычки',callback_data='list'))
     markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
     make = types.InlineKeyboardMarkup()
     make.add(types.InlineKeyboardButton('Создать новую привычку',callback_data='add'))
 
-    bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} {message.from_user.last_name}!')
+    bot.send_message(message.chat.id, f'Привет, {message.from_user.first_name} {message.from_user.last_name}!👋')
     if not habits:
         bot.send_message(message.chat.id, 'У тебя пока нет привычек.\nДобавим новую?',reply_markup=make)
         #bot.send_message(message.chat.id,'Добавим новую?',reply_markup=make)
         #markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
     else:
         bot.send_message(message.chat.id,'Ваше меню:', reply_markup=markup)
-#def add_habit(message):ъ
 
 def streak(habit_id):
 
@@ -167,7 +165,7 @@ def button(call):
 
         conn.close()
 
-        bot.answer_callback_query(call.id, "Молодец! Привычка выполнена")
+        bot.answer_callback_query(call.id, "Молодец! Привычка выполнена🎉")
 
         bot.edit_message_reply_markup(call.message.chat.id,call.message.message_id,reply_markup=None)
     elif call.data=='stats':
@@ -194,7 +192,6 @@ def button(call):
 
             markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
             markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
-            # markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
             markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
             markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
@@ -212,7 +209,7 @@ def save_name(message):
 
     user_action[message.chat.id]["step"] = "waiting_time"
 
-    bot.send_message(message.chat.id,"Во сколько напоминать?\nНапример: 09:00")
+    bot.send_message(message.chat.id,"Во сколько напоминать?⏰\nНапример: 09:00")
 
 
 #@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="waiting_time")
@@ -237,7 +234,6 @@ def save_time(message):
 
     markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
     markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
-    # markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
     markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
     markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
