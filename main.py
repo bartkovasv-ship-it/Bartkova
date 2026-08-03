@@ -15,7 +15,7 @@ def send_welcome(message):
     conn=sqlite3.connect('data.sql')
     cur=conn.cursor()
 
-    cur.execute('CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, name TEXT, remind_time TEXT)')
     cur.execute('CREATE TABLE IF NOT EXISTS progress(id INTEGER PRIMARY KEY AUTOINCREMENT, habit_id INTEGER, date TEXT)')
 
     conn.commit()
@@ -77,7 +77,7 @@ def streak(habit_id):
 @bot.callback_query_handler(func=lambda call: True)
 def button(call):
     if call.data=='add':
-        user_action[call.message.chat.id]="add_habit"
+        user_action[call.message.chat.id]="waiting_name"
         bot.send_message(call.message.chat.id,"Напиши название привычки:")
     elif call.data=='delete':
 
@@ -185,7 +185,7 @@ def button(call):
         if not result:
             stat = types.InlineKeyboardMarkup()
             stat.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
-            bot.send_message(call.message.chat.id,"У тебя пока нет выполненых привычек.\nДавай сделаем их",reply_markup=stat)
+            bot.send_message(call.message.chat.id,"У тебя пока нет выполненых привычек.\nДавай сделаем их.",reply_markup=stat)
         else:
             text="Твоя статистика:\n\n"
 
@@ -205,12 +205,24 @@ def button(call):
             bot.send_message(call.message.chat.id,text,reply_markup=markup)
 
 
-@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="add_habit")
-def save_habits(message):
+@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="waiting_name")
+def save_name(message):
+    user_action[message.chat.id] = {"name": message.text}
+
+    user_action[message.chat.id]["time"] = "waiting_time"
+
+    bot.send_message(message.chat.id,"Во сколько напоминать?\nНапример: 09:00")
+
+
+@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="waiting_time")
+def save_time(message):
+
+    habit = user_action[message.chat.id]
+
     conn=sqlite3.connect('data.sql')
     cur=conn.cursor()
 
-    cur.execute("INSERT INTO habits(user_id,name) VALUES(?,?)",(message.from_user.id,message.text))
+    cur.execute("INSERT INTO habits(user_id,name,remind_time) VALUES(?,?,?)",(message.from_user.id, habit["name"],message.text))
 
     conn.commit()
 
@@ -227,7 +239,7 @@ def save_habits(message):
     markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
     markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
-    bot.send_message(message.chat.id,f"Привычка '{message.text}' добавлена!", reply_markup=markup)
+    bot.send_message(message.chat.id,message.chat.id,f"✅ {habit['name']} добавлена\n"f"⏰ Напоминание: {message.text}")
 
 
 bot.polling(none_stop=True)
