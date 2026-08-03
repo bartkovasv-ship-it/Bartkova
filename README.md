@@ -22,8 +22,9 @@ pip install -r requirements.txt
 ## Запуск
 
 1. Запустить программу main.py
-2. Откройте бота в Telegram.
-3. Нажмите /start.
+2. В поисковике Telegram найдите бота @EveryTimeADay_bot
+2. Откройте бота 
+3. Нажмите /start
 
 ## Входные данные
 
