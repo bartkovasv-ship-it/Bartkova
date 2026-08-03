@@ -5,7 +5,7 @@ from telebot import types
 import sqlite3
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
-
+user_action={}
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
 
@@ -43,13 +43,33 @@ def send_welcome(message):
         #markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
     else:
         bot.send_message(message.chat.id,'Ваше меню:', reply_markup=markup)
-#def add_habit(message):
- @bot.callback_query_handler(func=lambda call: True)
- def button(call):
+#def add_habit(message):ъ
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def button(call):
     if call.data=='add':
-        bot.send_message(call.messege.chat.id,"Напиши название привычки:")
+        user_action[call.message.chat.id]="add_habit"
+        bot.send_message(call.message.chat.id,"Напиши название привычки:")
     elif call.data=='delete':
-        bot.send_message(call.messege.chat.id,"Удаление")
+        bot.send_message(call.message.chat.id,"Удаление")
     elif call.data=='mark':
-        bot.send_message(call.messege.chat.id,"Отмечание")
+        bot.send_message(call.message.chat.id,"Отмечание")
+
+@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="add_habit")
+def save_habits(message):
+    conn=sqlite3.connect('data.sql')
+    cur=conn.cursor()
+
+    cur.execute("INSERT INTO habits(user_id,name) VALUES(?,?)",(message.from_user.id,message.text))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    user_action.pop(message.chat.id)
+
+    bot.send_message(message.chat.id,f"Привычка '{message.text}' добавлена!")
+
 bot.polling(none_stop=True)
