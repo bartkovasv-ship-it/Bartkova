@@ -2,8 +2,9 @@ import telebot
 from telebot import types
 import sqlite3
 from datetime import datetime, timedelta
-#import schedule
-#import time
+import schedule
+import time
+import threading
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
 user_action={}
@@ -209,12 +210,13 @@ def button(call):
 def save_name(message):
     user_action[message.chat.id] = {"name": message.text}
 
-    user_action[message.chat.id]["time"] = "waiting_time"
+    user_action[message.chat.id]["step"] = "waiting_time"
 
     bot.send_message(message.chat.id,"Во сколько напоминать?\nНапример: 09:00")
 
 
-@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="waiting_time")
+#@bot.message_handler(func=lambda message: user_action.get(message.chat.id)=="waiting_time")
+@bot.message_handler(func=lambda message:isinstance(user_action.get(message.chat.id), dict) and user_action[message.chat.id].get("step")=="waiting_time")
 def save_time(message):
 
     habit = user_action[message.chat.id]
@@ -239,7 +241,27 @@ def save_time(message):
     markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
     markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
-    bot.send_message(message.chat.id,message.chat.id,f"✅ {habit['name']} добавлена\n"f"⏰ Напоминание: {message.text}")
+    bot.send_message(message.chat.id,f"✅ {habit['name']} добавлена\n"f"⏰ Напоминание: {message.text}",reply_markup=markup)
+
+def reminder():
+    while True:
+        now = datetime.now().strftime("%H:%M")
+
+        conn=sqlite3.connect('data.sql')
+        cur=conn.cursor()
+
+        cur.execute("SELECT user_id,name FROM habits WHERE remind_time=?",(now,))
+
+        habits=cur.fetchall()
+
+        conn.close()
+
+        for habit in habits:
+            bot.send_message(habit[0],f"⏰ Пора выполнить привычку: {habit[1]}")
+
+        time.sleep(60)
 
 
+
+threading.Thread(target=reminder).start()
 bot.polling(none_stop=True)
