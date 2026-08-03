@@ -7,13 +7,7 @@ from datetime import datetime
 
 bot=telebot.TeleBot('8953354779:AAEVWRhsADFt5NtNKJl0YUWAQ4275u0pva8')
 user_action={}
-markup = types.InlineKeyboardMarkup()
 
-markup.add(types.InlineKeyboardButton('Создать новую привычку',callback_data='add'))
-markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
-    #markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
-markup.add(types.InlineKeyboardButton('Мои привычки',callback_data='list'))
-markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
 
@@ -107,9 +101,10 @@ def button(call):
         conn = sqlite3.connect('data.sql')
         cur = conn.cursor()
 
-        cur.execute("SELECT habits.name, COUNT(progress.id) FROM habits LEFT JOIN progress ON habits.id = progress.habit_id WHERE habits.user_id=? GROUP BY habits.id",(call.from_user.id,))
+        cur.execute("SELECT habits.name, COUNT(progress.id) FROM habits LEFT JOIN progress ON habits.id = progress.habit_id WHERE habits.user_id=? GROUP BY habits.id, habits.name",(call.from_user.id,))
 
         result=cur.fetchall()
+
         print(result)
 
         conn.close()
@@ -138,6 +133,14 @@ def save_habits(message):
     conn.close()
 
     user_action.pop(message.chat.id)
+
+    markup = types.InlineKeyboardMarkup()
+
+    markup.add(types.InlineKeyboardButton('Создать новую привычку', callback_data='add'))
+    markup.add(types.InlineKeyboardButton('Удалить привычку', callback_data='delete'))
+    # markup.add(types.InlineKeyboardButton('Отметить выполнение', callback_data='mark'))
+    markup.add(types.InlineKeyboardButton('Мои привычки', callback_data='list'))
+    markup.add(types.InlineKeyboardButton('Статистика', callback_data='stats'))
 
     bot.send_message(message.chat.id,f"Привычка '{message.text}' добавлена!", reply_markup=markup)
 
